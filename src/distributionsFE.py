@@ -4,7 +4,16 @@ from math import log, pi, factorial
 from numpy import prod
 from classFE import *
 
-class FENormal(FE):
+"""
+Special cases with usual members of exponential family:
+	- Normal
+	- Poisson
+	- Binomial
+	- Inverse Gaussian
+	- Gamma
+"""
+
+class FENormal(FE2):
 	"""
 	Y ~ Normal(mu, sigma); mu in R, sigma > 0
 	E(Y) = mu
@@ -21,13 +30,22 @@ class FENormal(FE):
 		self.phi = 1.0/sigma**2
 		distribution = 'Normal'
 
+	def expectedValue(self):
+		return(self.mu)
+
+	def variance(self):
+		return(self.sigma)
+
 	def bTheta(self):
 		return((self.theta**2)/2.0)
 
 	def cYPhi(self, y):
 		return(0.5 * (log(self.phi) - log(2*pi) - (y*self.phi)**2))
 
-class FEPois(FE):
+	def canonicalLink(self):
+		return self.mu
+
+class FEPois(FE2):
 	"""
 	Y ~ Poisson(mu); mu > 0
 	E(Y) = mu
@@ -43,13 +61,22 @@ class FEPois(FE):
 		self.theta = log(mu)
 		distribution = 'Poisson'
 	
+	def expectedValue(self):
+		return(mu)
+
+	def variance(self):
+		return(mu)
+
 	def bTheta(self):
 		return(exp(self.theta))
 
 	def cYPhi(self, y):
 		return(log(prod(y)))
 
-class FEBinom(FE):
+	def canonicalLink(self):
+		return log(self.mu)
+
+class FEBinom(FE2):
 	"""
 	Y ~ Binomial(n, mu); mu in [0, 1], n in Z+
 	Y* = Y/n
@@ -67,13 +94,22 @@ class FEBinom(FE):
 		self.phi = n
 		distribution = 'Binomial'
 	
+	def expectedValue(self):
+		return(self.n*self.mu)
+
+	def variance(self):
+		return(self.n*self.mu*(1-self.mu))
+
 	def bTheta(self):
 		return(log(1+exp(self.theta)))
 
 	def cYPhi(self, y):
 		return(log(factorial(self.phi) / factorial(self.phi - y) / factorial(y)))
 
-class FEInvGaussian(FE):
+	def canonicalLink(self):
+		return log(self.mu/(1-self.mu))
+
+class FEInvGaussian(FE2):
 	"""
 	Y ~ NInv(mu, phi); mu > 0, phi > 0
 	E(Y) = mu
@@ -94,7 +130,10 @@ class FEInvGaussian(FE):
 	def cYPhi(self, y):
 		return(0.5*(log(self.phi) - log(2*pi*(y**3)) - 1/y))
 
-class FEGamma(FE):
+	def canonicalLink(self):
+		return 1/self.mu**2
+
+class FEGamma(FE2):
 	"""
 	Y ~ gamma(a, b); a > 0, b > 0
 	E(Y) = ab
@@ -111,8 +150,17 @@ class FEGamma(FE):
 		self.phi = a
 		distribution = 'Gamma'
 
+	def expectedValue(self):
+		return(self.mu)
+
+	def variance(self):
+		return(self.phi*self.mu)
+
 	def bTheta(self):
 		return(-log(-self.theta))
 
 	def cYPhi(self, y):
 		return(self.phi*log(y*self.phi) - log(y) - log(gamma(self.phi)))
+
+	def canonicalLink(self):
+		return 1/self.mu

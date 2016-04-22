@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from classFE import *
+from distributionsFE import *
+import sympy as sp
+import numpy as np
 
-def b(x):
-    return(x+1)
-    
-def c(y, x):
-    return(y*x)
-    
-dist1 = FE(b, c)
+theta = sp.symbols('theta')
+phi = sp.symbols('phi')
+y = sp.symbols('y')
 
-class A(object):
-    def foo(self, b):
-        print "foo", b
-
-class B(A):
-    def foo(self, a):
-        super(B, self).foo(a)
-
-myB = B()
-myB.foo(1)
+ns = FENormal(sp.symbols('mu'), sp.symbols('sigma'), symbolic=1)
+print ns.cYPhi(2)
